@@ -46,7 +46,7 @@ int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :
 { 	                              //形参struct gz *zggz是指向结构体的指针，形参t是main()中接受数据的结构体数组的下标t的引用
 	int n=0;             //n用来记录职工人数，一开始初始化为0
 
-	ifstream in("gx.dat",ios::in|ios::binary);
+	ifstream in("gz.dat",ios::in|ios::binary);
 	if(!in)
 	{ cout<<"Can not open input file.\n";
 	  exit(1);
