@@ -17,7 +17,7 @@ Function List:     //主要函数及其功能
 History:              //历史修改记录
 <author>          <time>            <Version>          <desc>
 杨家雄          2018/06/22            0.1             write  entirely  nine functions    
-
+杨家雄          2018/06/29            0.11            write  read()
 *******************************************************************************************************************************/
 
 
@@ -26,6 +26,7 @@ History:              //历史修改记录
 #include "string.h"
 #include <stdlib.h>
 #include <cstdio>
+ //#include <stdio.h>  
 #include <conio.h>
 #include <iomanip>
 using namespace std;
@@ -60,9 +61,9 @@ others:
 *************************************************************************************************/
 int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :read()函数
 { 	                              
-	int n=0;             //n用来记录职工人数，一开始初始化为0
-
-	ifstream in("gz.dat",ios::in|ios::binary);
+  	int n=0;             //n用来记录职工人数，一开始初始化为0
+   
+  /*  ifstream in("gz.dat",ios::in|ios::binary);
 	if(!in)
 	{ 
 		printf("Can not open input file.\n");
@@ -72,15 +73,33 @@ int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :
     for(int i=0;!in.eof();i++)                 //用eof()函数判断文件指针是否到文件尾，即是否读完文件中的数据
 	{  
 	    in.read((char*)&zggz[i],sizeof(zggz[i]));
-		n++;                                         //记录职工人数   		                   
+		n++;                                //记录职工人数   		                   
 	}
+	 
+	in.close();   */   
 	
-	in.close();
+    FILE *fp;
+	gz *p;
+	p=zggz;
+
+    if((fp=fopen("gz.dat","rb"))==NULL)
+	{
+		printf("Can not open file strike any key exit !");
+		getch();
+		exit(-1);
+	}
+
+	for(i=0;!feof(fp);i++,p++)
+	{
+       fread(p,sizeof(struct gz),1,fp);
+	   n++;
+	}
+
 	printf("成功读取文件中的数据\n");
 	printf("该文件中的职工人数是：");
     printf("%d\n",n-1);
-	//cout<<n-1<<endl;
-	//cout<<"成功读取文件中的数据."<<endl;
+
+    fclose(fp); 
 return n-1;                     //返回职工人数n的值
 }
 
@@ -119,7 +138,7 @@ int write(struct gz *zggz,int &n)       //保存职工工资数据函数 write()
 		printf("因为N为0或小于0，所以出错了。 \n");  
 		return 1;
 	}
-
+    fclose(fp);
 	printf("成功将结构体数组的数据存入文件gz.dat中.\n");
 return 0;
 }
@@ -345,7 +364,7 @@ int del(struct gz *zggz,int &t,int &n)
 		return 1;
 	}
 
-     printf("停止查找··· \n");
+    printf("停止查找··· \n");
 return 0;
 }
 
