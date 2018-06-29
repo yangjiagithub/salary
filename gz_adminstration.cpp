@@ -25,6 +25,7 @@ History:              //历史修改记录
 #include <fstream>
 #include "string.h"
 #include <stdlib.h>
+#include <cstdio>
 #include <conio.h>
 #include <iomanip>
 using namespace std;
@@ -42,6 +43,8 @@ struct gz
 	float yf_salary;    //应发工资
 	float gr;         //个人所得税
 	float sf_salary;    // 实发工资	
+	gz *prev;       //双向链表的前指针，一个指向直接前驱的指针
+	gz *next;      //双向链表的后指针，一个指向直接后继的指针
 };
 
 
@@ -61,8 +64,9 @@ int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :
 
 	ifstream in("gz.dat",ios::in|ios::binary);
 	if(!in)
-	{ cout<<"Can not open input file.\n";
-	  exit(1);
+	{ 
+		printf("Can not open input file.\n");
+	    exit(1);
 	}
 
     for(int i=0;!in.eof();i++)                 //用eof()函数判断文件指针是否到文件尾，即是否读完文件中的数据
@@ -72,8 +76,11 @@ int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :
 	}
 	
 	in.close();
-	cout<<n-1<<endl;
-	cout<<"成功读取文件中的数据."<<endl;
+	printf("成功读取文件中的数据\n");
+	printf("该文件中的职工人数是：");
+    printf("%d\n",n-1);
+	//cout<<n-1<<endl;
+	//cout<<"成功读取文件中的数据."<<endl;
 return n-1;                     //返回职工人数n的值
 }
 
@@ -98,7 +105,7 @@ int write(struct gz *zggz,int &n)       //保存职工工资数据函数 write()
 	{   
 		if((fp=fopen("gz.dat","wb+"))==NULL)   
 		{
-			cout<<"Can not open file strike any key exit!";
+			printf("Can not open file strike any key exit!\n");
 			getch();
 			exit(1);
 		}
@@ -109,11 +116,11 @@ int write(struct gz *zggz,int &n)       //保存职工工资数据函数 write()
 
 	else      
 	{ 
-		cout<<"因为N为0或小于0，所以出错了。 "<<endl;  
+		printf("因为N为0或小于0，所以出错了。 \n");  
 		return 1;
 	}
 
-	cout<<"成功将结构体数组的数据存入文件gz.dat中."<<endl;
+	printf("成功将结构体数组的数据存入文件gz.dat中.\n");
 return 0;
 }
 
@@ -133,22 +140,28 @@ int find(struct gz *zggz,int &n1)
 	char gonghao[10];
     int k;
 
-	cout<<"请输入工号： "<<endl;
-	cin>>gonghao; 
-
+	printf("请输入工号： \n");
+	scanf("%s",gonghao);
+	
+    gz *p=&zggz[0]; 
+	gz *head;          //定义head 头指针
+	zggz[0].prev=head;
     for(i=0;i<n1;i++)
-	{ 
-	     k=strcmp(zggz[i].te_number,gonghao);  //k=0,即输入工号number=zggz[i].te_number
+	{    
+		 
+	     k=strcmp(p->te_number,gonghao);  //k=0,即输入工号number=zggz[i].te_number
 	     if(k==0)
-		 {
-            cout<<"工号"<<setw(7)<<"姓名"<<setw(9)<<"岗位工资"<<setw(9)<<"薪级工资"<<setw(9)<<"职务津贴"<<setw(9);   //使用setw()函数，设定下次输出宽度，让输出的数据右对齐
-	        cout<<"绩效工资"<<setw(9)<<"应发工资"<<setw(12)<<"个人所得税"<<setw(9)<<"实发工资"<<endl;
-			cout<<zggz[i].te_number<<setw(7)<<zggz[i].name<<setw(9);
-			cout<<zggz[i].salary<<setw(9)<<zggz[i].xj_salary<<setw(9)<<zggz[i].jt_salary<<setw(9);
-			cout<<zggz[i].jx_salary<<setw(9)<<zggz[i].yf_salary<<setw(12);
-			cout<<zggz[i].gr<<setw(9)<<zggz[i].sf_salary<<endl;     
-		    cout<<"停止查找，将回到主菜单。"<<endl;
+		 {  
+		    printf("工号  姓名  岗位工资 薪级工资 职务津贴  ");   
+			printf("绩效工资  应发工资 个人所得税 实发工资\n");
+			printf("%s %s   ",p->te_number,p->name);
+			printf("%.1f\t%.1f\t%.1f\t",p->salary,p->xj_salary,p->jt_salary);
+			printf("%.1f\t  %.1f\t%.1f\t",p->jx_salary,p->yf_salary,p->gr);
+		    printf("%.1f\n",p->sf_salary);     
+		    printf("停止查找，将回到主菜单。\n");
 		 }
+
+	     p=p->next;    //使p指向下一个节点 
 	}
 
   return 0;
@@ -165,25 +178,22 @@ Return:  返回return=0
 others:  
 *************************************************************************************************/
 int list(struct gz *zggz,int &n)     
-{                                    
+{   
+	gz *p=&zggz[0];                                 
 	for(i=0;i<n;i++)      //在结构体数组中从zggz[0] 开始，到n+1条记录结束
 	{       
-		    cout<<"工号"<<setw(7)<<"姓名"<<setw(9)<<"岗位工资"<<setw(9)<<"薪级工资"<<setw(9)<<"职务津贴"<<setw(9);   //使用setw()函数，设定下次输出宽度，让输出的数据右对齐
-	        cout<<"绩效工资"<<setw(9)<<"应发工资"<<setw(12)<<"个人所得税"<<setw(9)<<"实发工资"<<endl;
-			cout<<zggz[i].te_number<<setw(7)<<zggz[i].name<<setw(9);
-			cout<<zggz[i].salary<<setw(9)<<zggz[i].xj_salary<<setw(9)<<zggz[i].jt_salary<<setw(9);
-			cout<<zggz[i].jx_salary<<setw(9)<<zggz[i].yf_salary<<setw(12);
-			cout<<zggz[i].gr<<setw(9)<<zggz[i].sf_salary<<endl; 
-			
-     /*     cout<<"工号"<<"  "<<"姓名"<<"     "<<"岗位工资"<<" "<<"薪级工资"<<" "<<"职务津贴"<<" ";          //使用在双引号中加空格的方式间隔数据，再输出
-	        cout<<"绩效工资"<<" "<<"应发工资"<<" "<<"个人所得税"<<" "<<"实发工资"<<endl;
-			cout<<zggz[i].te_number<<"  "<<zggz[i].name<<"    ";
-			cout<<zggz[i].salary<<"     "<<zggz[i].xj_salary<<"     "<<zggz[i].jt_salary<<"       ";
-			cout<<zggz[i].jx_salary<<"       "<<zggz[i].yf_salary<<"  ";
-			cout<<zggz[i].gr<<"     "<<zggz[i].sf_salary<<endl;                                       */
+		    printf("工号  姓名  岗位工资 薪级工资 职务津贴  ");   
+			printf("绩效工资  应发工资 个人所得税 实发工资\n");
+			printf("%s %s   ",p->te_number,p->name);
+			printf("%.1f\t%.1f\t%.1f\t",p->salary,p->xj_salary,p->jt_salary);
+			printf("%.1f\t  %.1f\t%.1f\t",p->jx_salary,p->yf_salary,p->gr);
+		    printf("%.1f\n",p->sf_salary);    
+			p=p->next;       //使p指向下一个节点   
 	}
 
-    cout<<"当前职工工资管理系统中有 "<<n<<"位职工的数据. "<<endl;
+    printf("当前职工工资管理系统中有 ");
+	printf("  %d",n);
+	printf("位职工的数据. \n");
 return 0;
 }
 
@@ -200,44 +210,56 @@ others:
 void modify(struct gz *zggz,int &n1)  
 {                                    
 	int k;              //k用于记录strcmp函数的值，k=0即找到工号相同
-	gz xigz;             //定义结构体变量xigz
-
-	char gonghao[10];
-	cout<<"请输入工号： "<<endl;
-	cin>>gonghao;
 	
-    for(i=0;i<n1;i++)
+	char gonghao[10];
+	printf(" 请输入工号： \n");
+	scanf("%s",&gonghao);
+
+	gz *p=&zggz[0];
+	gz *head;        //定义一个head 头指针
+	zggz[0].prev=head;   //第一个节点的前驱指针指向 head
+
+    for(i=0;i<n1;i++,p=p->next)
 	{ 
-	     k=strcmp(zggz[i].te_number,gonghao);  //k=0,即输入工号number=zggz[i].te_number
+	     k=strcmp(p->te_number,gonghao);  //k=0,即输入工号number=zggz[i].te_number
 	     if(k==0)
 		 {
-	     cout<<"重新录入基本信息:"<<endl;
-		 cout<<"工号"<<" ";
-		 cin>>xigz.te_number;
-		 cout<<"姓名"<<" ";
-		 cin>>xigz.name;
-		 cout<<"岗位工资"<<" ";
-		 cin>>xigz.salary;
-		 cout<<"薪级工资"<<" ";
-		 cin>>xigz.xj_salary;
-		 cout<<"职务津贴"<<" ";
-		 cin>>xigz.jt_salary;
-		 cout<<"绩效工资"<<"  ";
-		 cin>>xigz.jx_salary;
+	       printf(" 重新录入基本信息:\n");
+		   printf("工号:");
+		   scanf("%s",&(p->te_number));
+           printf("\n");
 
-		 xigz.yf_salary=(xigz.salary+xigz.xj_salary+xigz.jt_salary+xigz.jx_salary);   //计算应发工资
+		   printf("姓名:");
+		   cscanf("%s",&(p->name));
+           printf("\n");
+
+		   printf("岗位工资:");
+		   scanf("%f",&(p->salary));
+           printf("\n");
+
+		   printf("薪级工资:");
+		   scanf("%f",&(p->xj_salary));
+           printf("\n");
+
+		   printf("职务津贴:");
+		   scanf("%f",&(p->jt_salary));
+		   printf("\n");
+
+		   printf("绩效工资:");
+		   scanf("%f",&(p->jx_salary));
+		   printf("\n");
+
+		   p->yf_salary=(p->salary+p->xj_salary+p->jt_salary+p->jx_salary);   //计算应发工资
 		                                               	                                        
-         xigz.gr=grsds(xigz.yf_salary);               //计算个人所得税
+           p->gr=grsds(p->yf_salary);               //计算个人所得税
 		
-		 xigz.sf_salary=(xigz.yf_salary-xigz.gr);   //计算实发工资
-		
-		 zggz[i]=xigz;              //将结构体变量xigz的值给zggz[i],完成修改
+		   p->sf_salary=(p->yf_salary-p->gr);   //计算实发工资
 
-		 cout<<"修改该职工的工资信息完成. "<<endl;
+		   printf("修改该职工的工资信息完成. \n");
 		}
 	}
 
-   cout<<"修改该职工的工资记录已完成。 "<<endl; 
+    printf("修改该职工的工资记录已完成。 \n"); 
 }
 
 /*************************************************************************************************
@@ -255,20 +277,26 @@ int del(struct gz *zggz,int &t,int &n)
 	int mubi, k;                
     char number[10];        //number用来接受所输入工号
 
-	cout<<"请输入工号："<<endl;
-	cin>>number;
+    printf(" 请输入工号： \n");
+	
+	scanf("%s",&number);
 
 	int flag=0;
+   	gz *p=&zggz[0];
+	gz *head;        //定义一个head 头指针
+	zggz[0].prev=head;   //第一个节点的前驱指针指向 head
 
-	for(i=0;i<t;i++)
+	for(i=0;i<t;i++,p=p->next)
 	{  
 	
-	   k=strcmp(zggz[i].te_number,number);  //k=0,即输入工号number=zggz[i].te_number
+	   k=strcmp(p->te_number,number);  //k=0,即输入工号number=zggz[i].te_number
 	   if(k==0)
 	   {
 		  flag=1;
 		  mubi=i;
-		  cout<<"在数组中查到，要删除的数据位于，是zggz["<<i<<"] "<<endl;
+		  printf("在数组中查到，要删除的数据位于，是zggz[");
+		  printf("%d",i);
+		  printf("]\n");
 		  break; 
 	   }
 
@@ -276,39 +304,48 @@ int del(struct gz *zggz,int &t,int &n)
 	   {      
 			   if(!flag)
 			   {
-			   cout<<"数组中的n+1记录没有,错误。 "<<endl;  
+			   printf("数组中的n+1记录没有,错误。\n ");  
 			   return 1;
 			   }
 	   }
 	 
 	}
 
-	cout<<"确认删除否？输入11确认，输入22放弃删除。"<<endl;
+	printf("确认删除否？输入11确认，输入22放弃删除。\n");
 
 	int s;             //s用来记录输入整数命令（11或22）
-	cin>>s;
+	scanf("%d",&s);
 
 	if(s==11)       //删除该记录
 	{  
-		cout<<"将删除该记录··· "<<endl; 
-		if(mubi<n)
+		printf("将删除该记录··· \n");
+	
+		if(mubi==0)
+		{    
+				 zggz[mubi]=zggz[mubi+1];
+				 zggz[mubi].next=&zggz[mubi+2];
+				 zggz[mubi+2].prev=&zggz[mubi];	
+		}
+
+		else
 		{
-			 for(int j=mubi;j<n;j++)  
-			 {
-                zggz[j]=zggz[j+1];
-			 }
+			  for(int j=mubi;j<n;j++)  
+				 {   
+				  zggz[j-1].next=&zggz[j+1];
+				  zggz[j+1].prev=&zggz[j-1];
+				 }
+		}
 		 
-		} 
-		n=n-1;
+	    n=n-1;
 	}
 		   
 	else if(s==22)
 	{   
-		cout<<"已放弃删除······"<<endl;
+		printf("已放弃删除······\n");
 		return 1;
 	}
 
-     cout<<"停止查找··· "<<endl;
+     printf("停止查找··· \n");
 return 0;
 }
 
@@ -323,36 +360,64 @@ Return:  return 0
 others:  
 *************************************************************************************************/
 int add(struct gz *zggz,int &n1)     
-{                                   
-    cout<<"依次输入职工基本信息:"<<endl;
-	cout<<"工号"<<" ";
-	cin>>zggz[n1].te_number;
-	cout<<"姓名"<<" ";
-	cin>>zggz[n1].name;
-	cout<<"岗位工资"<<" ";
-	cin>>zggz[n1].salary;
-	cout<<"薪级工资"<<" ";
-    cin>>zggz[n1].xj_salary;
-    cout<<"职务津贴"<<" ";
-	cin>>zggz[n1].jt_salary;
-	cout<<"绩效工资"<<"  ";
-	cin>>zggz[n1].jx_salary;
+{   
+	gz *p;
 
-    zggz[n1].yf_salary=(zggz[n1].salary+zggz[n1].xj_salary+zggz[n1].jt_salary+zggz[n1].jx_salary);  //计算应发工资
+	if(n1==0)    //当文件中一个数据都没有，n1为零时
+	{
+		p=&zggz[0];
+		gz *head;        //定义一个head 头指针
+	    zggz[0].prev=head;   //第一个节点的前驱指针指向 head
+	}
+
+	else        //文件中有数据时
+	{
+       p=zggz[n1-1].next;
+	}
+
+                                  
+    printf("依次输入职工基本信息:\n");
+	printf("工号:");
+	scanf("%s",&(p->te_number));
+	printf("\n");
+
+	printf("姓名:");
+	scanf("%s",&(p->name));
+	printf("\n");
+
+	printf("岗位工资:");
+	scanf("%f",&(p->salary));
+    printf("\n");
+
+	printf("薪级工资:");
+    scanf("%f",&(p->xj_salary));
+    printf("\n");
+
+    printf("职务津贴:");
+	scanf("%f",&(p->jt_salary));
+	printf("\n");
+
+	printf("绩效工资:");
+	scanf("%f",&(p->jx_salary));
+    printf("\n");
+
+    p->yf_salary=(p->salary+p->xj_salary+p->jt_salary+p->jx_salary);  //计算应发工资
                                       
-    zggz[n1].gr=grsds(zggz[n1].yf_salary);               //计算个人所得税
+    p->gr=grsds(p->yf_salary);               //计算个人所得税
 	
-	zggz[n1].sf_salary=(zggz[n1].yf_salary-zggz[n1].gr);   //计算实发工资
-
-    cout<<"此职工的全部信息为 :"<<endl;
-	cout<<"工号"<<setw(7)<<"姓名"<<setw(9)<<"岗位工资"<<setw(9)<<"薪级工资"<<setw(9)<<"职务津贴"<<setw(9);   //使用setw()函数，设定下次输出宽度，让输出的数据右对齐
-	cout<<"绩效工资"<<setw(9)<<"应发工资"<<setw(12)<<"个人所得税"<<setw(9)<<"实发工资"<<endl;
-    cout<<zggz[n1].te_number<<setw(7)<<zggz[n1].name<<setw(9);
-	cout<<zggz[n1].salary<<setw(9)<<zggz[n1].xj_salary<<setw(9)<<zggz[n1].jt_salary<<setw(9);
-	cout<<zggz[n1].jx_salary<<setw(9)<<zggz[n1].yf_salary<<setw(12);
-	cout<<zggz[n1].gr<<setw(9)<<zggz[n1].sf_salary<<endl;    
+	p->sf_salary=(p->yf_salary-p->gr);   //计算实发工资
+   
+    printf("工号  姓名  岗位工资 薪级工资 职务津贴  ");   
+	printf("绩效工资  应发工资 个人所得税 实发工资\n");
+    printf("%s %s",p->te_number,p->name);
+	printf("  %.1f    %.1f   %.1f   ",p->salary,p->xj_salary,p->jt_salary);
+	printf("%.1f     %.1f    %.1f",p->jx_salary,p->yf_salary,p->gr);
+    printf("    %.1f\n",p->sf_salary);     
+			
 	n1=n1+1;
-	cout<<"职工人数增加1后为： "<<n1<<endl;
+	printf("职工人数增加1后为： ");
+	printf("%d",n1);
+	printf("人\n");
 return 0;
 }
 
@@ -431,25 +496,47 @@ others:
 *************************************************************************************************/
 int main()      
 {    
-    gz zggz1[50];
-    int t=50;     //记录结构体数组zggz1的下标
+    gz zggz1[60];
+    int t=60;     //记录结构体数组zggz1的下标
+	gz *head;        //定义一个head 头指针
+	zggz1[0].prev=head;   //第一个节点的前驱指针指向 head
+
+
+	for(i=0;i<59;i++)
+	{ 
+		zggz1[i].next=&zggz1[i+1];
+        zggz1[i+1].prev=&zggz1[i];
+	}
+
+    zggz1[59].next=NULL;
+
 
     n=read(zggz1,t);
-    cout<<"职工人数为： "<<n<<endl;
+    printf("职工人数为： ");
+	printf("%d\n",n);
 	 
 	
-    int cm;                 //记录命令数字的值
-	cout<<"———————————— 欢迎使用职工工资管理系统！ ——————————————"<<endl;
+    int cm;  //记录命令数字的值
+	    printf("       ###  欢迎使用广西民族大学软件与信息安全学院职工工资管理系统  ###\n");
+	    printf("\n");
 	
 	
 	while(cm)
-	{ 
-		cout<<"                                  功能菜单:"<<endl;
-		cout<<"                           1.查询 2.修改 3.添加 "<<endl;
-		cout<<"                           4.删除 5.保存 6.浏览 "<<endl;
-		cout<<"                                  7.退出"<<endl;
-	    cout<<"请输入命令：******************************************************************"<<endl;
-        cin>>cm;
+	{   
+		printf("       请选择（1 — 7）：\n");
+		printf("       ================================================================\n");
+        printf("       |        1.查询职工工资记录                                    |\n");
+		printf("       |        2.修改职工工资记录                                    |\n");
+        printf("       |        3.添加职工工资记录                                    |\n");
+		printf("       |        4.删除职工工资记录                                    |\n");
+		printf("       |        5.保存数据到文件                                      |\n");
+		printf("       |        6.浏览职工记录                                        |\n");
+		printf("       |        7.退出系统                                            |\n");
+		printf("       ================================================================\n");
+		printf("\n");
+		printf("      你的选择是：\n");
+
+		scanf("%d",&cm);
 
 	    switch(cm)         //使用switch语句实现多分支选择，即执行所输入不同数字命令
 		{ 
@@ -491,13 +578,13 @@ int main()
 
 		   case 7:
 			  {
-				 cout<<"操作结束，立即退出： "<<endl;
+				 printf("操作结束，立即退出：\n ");
 				 return 0;
 			  }
 
            default:
 			  {
-				  cout<<"用户您输入命令错误（输入了1至7以外的数字），如需退出请输入7"<<endl;
+				  printf("用户您输入命令错误（输入了1至7以外的数字），如需退出请输入7\n");
 			  }
 		}
 
