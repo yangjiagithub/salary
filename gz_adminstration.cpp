@@ -25,7 +25,7 @@ History:              //历史修改记录
 #include <fstream>
 #include "string.h"
 #include <stdlib.h>
-#include <cstdio>  
+#include <cstdio> 
 #include <conio.h>
 #include <iomanip>
 using namespace std;
@@ -61,11 +61,27 @@ others:
 int read(struct gz *zggz,int &t)    //主函数执行时要调用和必须调用的第一个函数 :read()函数
 { 	                              
   	int n=0;             //n用来记录职工人数，一开始初始化为0
+   
+  /*  ifstream in("gz.dat",ios::in|ios::binary);
+	if(!in)
+	{ 
+		printf("Can not open input file.\n");
+	    exit(1);
+	}
+
+    for(int i=0;!in.eof();i++)                 //用eof()函数判断文件指针是否到文件尾，即是否读完文件中的数据
+	{  
+	    in.read((char*)&zggz[i],sizeof(zggz[i]));
+		n++;                                //记录职工人数   		                   
+	}
+	 
+	in.close();   */   
+	
     FILE *fp;
 	gz *p;
 	p=zggz;
 
-    if((fp=fopen("gz.dat","rb"))==NULL)
+    if((fp=fopen("gz.dat","ab+"))==NULL)
 	{
 		printf("Can not open file strike any key exit !");
 		getch();
@@ -169,7 +185,6 @@ int find(struct gz *zggz,int &n1)
   return 0;
 }
 
-
 /*************************************************************************************************
 Function:    list()         
 Description: 显示所有职工的记录。
@@ -228,12 +243,12 @@ void modify(struct gz *zggz,int &n1)
 	     if(k==0)
 		 {
 	       printf(" 重新录入基本信息:\n");
-		   printf("工号:");
-		   scanf("%s",&(p->te_number));
-           printf("\n");
+		  // printf("工号:");
+		  // scanf("%s",&(p->te_number));
+          // printf("\n");
 
 		   printf("姓名:");
-		   cscanf("%s",&(p->name));
+		   printf("%s",p->name);
            printf("\n");
 
 		   printf("岗位工资:");
